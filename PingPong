@@ -1,0 +1,137 @@
+import pygame
+import random
+from __builtin__ import False
+pygame.init()
+pygame.font.init()
+
+fpsClock = pygame.time.Clock()
+
+winner = 0
+
+run = True
+
+p1score = 0
+p2score = 0
+pygame.display.set_caption('Ping Pong')
+win = pygame.display.set_mode((700,480))
+myfont = pygame.font.SysFont('Comic Sans MS', 30)
+p1scoretxt = myfont.render('Player 1: ' + str(p1score), False, (255, 255, 255))
+p2scoretxt = myfont.render('Player 2: ' + str(p2score), False, (255, 255, 255))
+
+
+
+class player(object):
+    def __init__(self,x,y,width,height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 5
+    
+class ball(object):
+    def __init__(self, bx,by, bxx, byy, bvel):
+        self.bx = bx
+        self.by = by
+        self.bxx = bxx
+        self.byy = byy
+        self.bvel = bvel
+
+
+
+
+
+
+    
+def redrawGameWindow():
+    win.fill((0,0,0))
+    pygame.draw.rect(win, (255,255,255), (p1.x, p1.y, p1.width, p1.height))
+    pygame.draw.rect(win, (255,255,255), (p2.x, p2.y, p2.width, p2.height))
+    pygame.draw.circle(win, (255,255,255), (ball.bx,ball.by), 10)
+    win.blit(p1scoretxt,(30,0))
+    win.blit(p2scoretxt,(530,0))
+    pygame.display.update()
+
+
+something = False
+ball = ball(350, 240, -1, 0, 5)
+
+p1 = player(85, 215, 15, 50)
+p2 = player(600, 215, 15, 50)
+while run:
+    fpsClock.tick(60)
+    
+    if p1score == 5:
+        run = False
+        winner = "p1"
+    if p2score == 5:
+        run = False
+        winner = "p2"
+    
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+    
+    keys = pygame.key.get_pressed()
+    
+    #Player 1 move UP and DOWN
+    if keys[pygame.K_w] and p1.y > p1.vel:
+        p1.y -= p1.vel
+    elif keys[pygame.K_s] and p1.y < 480 - p1.height - p1.vel:
+        p1.y += p1.vel
+    
+    #Player 2 move UP and DOWN
+    if keys[pygame.K_UP] and p2.y > p2.vel:
+        p2.y -= p2.vel
+    elif keys[pygame.K_DOWN] and p2.y < 480 - p2.height - p2.vel:
+        p2.y += p2.vel
+        
+        
+    #ball movement
+    if ball.by >= p1.y and ball.by <= p1.y + p1.height and ball.bx - 10 >= p1.x and ball.bx - 10 <= p1.x + p1.width:
+        ball.bxx *= -1
+        ball.byy = random.randint(-1,2)
+    if ball.by >= p2.y and ball.by <= p2.y + p2.height and ball.bx + 10 >= p2.x and ball.bx + 10 <= p2.x + p2.width:
+        ball.bxx *= -1
+        ball.byy = random.randint(-1,2)
+        
+    
+    #wall bounce  
+    if ball.by - 10 < 0 or ball.by + 10 >= 480:
+        ball.byy *= -1
+        
+    #scoring
+    
+    if ball.bx + 10 >= 700:
+        p1score += 1
+        ball.bxx = 1
+        ball.byy = 0
+        ball.bx = 350
+        ball.by = 240
+    elif ball.bx - 10 <= 0:
+        p2score += 1
+        ball.bxx = -1
+        ball.byy = 0
+        ball.bx = 350
+        ball.by = 240
+        
+    ball.bx += ball.bvel * ball.bxx
+    ball.by += ball.byy
+    p1scoretxt = myfont.render('Player 1: ' + str(p1score), False, (255, 255, 255))
+    p2scoretxt = myfont.render('Player 2: ' + str(p2score), False, (255, 255, 255))
+
+    redrawGameWindow()
+    
+    
+
+win.fill((0,0,0))
+pygame.font.init()
+myfont = pygame.font.SysFont('Comic Sans MS', 50)
+p1wins = myfont.render('PLAYER 1 WINS!', False, (255, 0, 0))
+p2wins = myfont.render('PLAYER 2 WINS!', False, (255, 0, 0))
+if winner == "p1":
+    win.blit(p1wins,(150,200))
+elif winner == "p2":
+    win.blit(p2wins,(150,200)) 
+pygame.display.update()
+pygame.time.delay(5000)
